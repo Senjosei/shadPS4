@@ -371,6 +371,22 @@ bool PipelineCache::RefreshGraphicsKey() {
             return false;
         }
 
+        // Shader skips for God of War III Remastered
+        // White screen issue.
+        if (bininfo.shader_hash == 0x394ef85fcecf26dd) {
+            return false;
+        }
+
+        // Texture flickering issue.
+        if (bininfo.shader_hash == 0xccdebd80d1b8f55c) {
+            return false;
+        }
+
+        // White color glitches issue.
+        if (bininfo.shader_hash == 0x5ef487a5facae08f) {
+            return false;
+        }
+
         auto params = Liverpool::GetParams(*pgm);
         std::optional<Shader::Gcn::FetchShaderData> fetch_shader_;
         std::tie(infos[stage_out_idx], modules[stage_out_idx], fetch_shader_,
