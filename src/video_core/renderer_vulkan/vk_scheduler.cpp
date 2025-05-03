@@ -133,7 +133,7 @@ void Scheduler::SubmitExecution(SubmitInfo& info) {
     static constexpr std::array<vk::PipelineStageFlags, 2> wait_stage_masks = {
         vk::PipelineStageFlagBits::eAllCommands,
         vk::PipelineStageFlagBits::eColorAttachmentOutput,
-    };`
+    };
 
     const vk::TimelineSemaphoreSubmitInfo timeline_si = {
         .waitSemaphoreValueCount = static_cast<u32>(info.wait_ticks.size()),
