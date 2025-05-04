@@ -26,7 +26,7 @@ using Shader::LogicalStage;
 using Shader::Stage;
 using Shader::VsOutput;
 
-constexpr static auto SpirvVersion1_6 = 0x00010600U;
+constexpr static auto SpirvVersion1_6 = 0x00010500U; //0x00010600U;
 
 constexpr static std::array DescriptorHeapSizes = {
     vk::DescriptorPoolSize{vk::DescriptorType::eUniformBuffer, 8192},
@@ -194,7 +194,7 @@ PipelineCache::PipelineCache(const Instance& instance_, Scheduler& scheduler_,
       desc_heap{instance, scheduler.GetMasterSemaphore(), DescriptorHeapSizes} {
     const auto& vk12_props = instance.GetVk12Properties();
     profile = Shader::Profile{
-        .supported_spirv = 0x00010500U, //SpirvVersion1_6,
+        .supported_spirv = SpirvVersion1_6,
         .subgroup_size = instance.SubgroupSize(),
         .support_float64 = instance.IsShaderFloat64Supported(),
         .support_fp32_denorm_preserve = bool(vk12_props.shaderDenormPreserveFloat32),
@@ -203,10 +203,10 @@ PipelineCache::PipelineCache(const Instance& instance_, Scheduler& scheduler_,
         .support_explicit_workgroup_layout = true,
         .support_legacy_vertex_attributes = instance_.IsLegacyVertexAttributesSupported(),
         .supports_image_load_store_lod = instance_.IsImageLoadStoreLodSupported(),
-        .supports_native_cube_calc = false, //instance_.IsAmdGcnShaderSupported(),
-        .supports_trinary_minmax = false, //instance_.IsAmdShaderTrinaryMinMaxSupported(),
-        .supports_robust_buffer_access = false, //instance_.IsRobustBufferAccess2Supported(),
-        .supports_image_fp32_atomic_min_max = false, //instance_.IsShaderAtomicFloatImage32MinMaxSupported(),
+        .supports_native_cube_calc = instance_.IsAmdGcnShaderSupported(),
+        .supports_trinary_minmax = instance_.IsAmdShaderTrinaryMinMaxSupported(),
+        .supports_robust_buffer_access = instance_.IsRobustBufferAccess2Supported(),
+        .supports_image_fp32_atomic_min_max = instance_.IsShaderAtomicFloatImage32MinMaxSupported(),
         .needs_manual_interpolation = instance.IsFragmentShaderBarycentricSupported() &&
                                       instance.GetDriverID() == vk::DriverId::eNvidiaProprietary,
         .needs_lds_barriers = instance.GetDriverID() == vk::DriverId::eNvidiaProprietary ||

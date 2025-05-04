@@ -127,7 +127,7 @@ public:
 
     /// Returns true when the robustBufferAccess2 feature of VK_EXT_robustness2 is supported.
     bool IsRobustBufferAccess2Supported() const {
-        return robustness2 && robustness2_features.robustBufferAccess2;
+        return false; //robustness2 && robustness2_features.robustBufferAccess2;
     }
 
     /// Returns true when the nullDescriptor feature of VK_EXT_robustness2 is supported.
@@ -157,18 +157,18 @@ public:
 
     /// Returns true when VK_AMD_gcn_shader is supported.
     bool IsAmdGcnShaderSupported() const {
-        return amd_gcn_shader;
+        return false; //amd_gcn_shader;
     }
 
     /// Returns true when VK_AMD_shader_trinary_minmax is supported.
     bool IsAmdShaderTrinaryMinMaxSupported() const {
-        return amd_shader_trinary_minmax;
+        return false; //amd_shader_trinary_minmax;
     }
 
     /// Returns true when the shaderImageFloat32AtomicMinMax feature of
     /// VK_EXT_shader_atomic_float2 is supported.
     bool IsShaderAtomicFloatImage32MinMaxSupported() const {
-        return shader_atomic_float2 && shader_atomic_float2_features.shaderImageFloat32AtomicMinMax;
+        return false; //shader_atomic_float2 && shader_atomic_float2_features.shaderImageFloat32AtomicMinMax;
     }
 
     /// Returns true when geometry shaders are supported by the device
