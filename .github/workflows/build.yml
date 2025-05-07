@@ -14,14 +14,14 @@ env:
 
 jobs:
   reuse:
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     continue-on-error: true
     steps:
     - uses: actions/checkout@v4
     - uses: fsfe/reuse-action@v5
 
   clang-format:
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     continue-on-error: true
     steps:
     - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
       run: ./.ci/clang-format.sh
       
   get-info:
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     outputs:
       date: ${{ steps.vars.outputs.date }}
       shorthash: ${{ steps.vars.outputs.shorthash }}
@@ -164,7 +164,7 @@ jobs:
   pre-release:
     if: github.ref == 'refs/heads/main' && github.repository == 'shadps4-emu/shadPS4' && github.event_name == 'push'
     needs: [get-info, windows-sdl, windows-qt]
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
