@@ -122,10 +122,34 @@ bool addGameInstallDir(const std::filesystem::path& dir, bool enabled = true);
 void removeGameInstallDir(const std::filesystem::path& dir);
 void setGameInstallDirEnabled(const std::filesystem::path& dir, bool enabled);
 void setAddonInstallDir(const std::filesystem::path& dir);
+void setMainWindowTheme(u32 theme);
+void setIconSize(u32 size);
+void setIconSizeGrid(u32 size);
+void setSliderPosition(u32 pos);
+void setSliderPositionGrid(u32 pos);
+void setTableMode(u32 mode);
+void setMainWindowWidth(u32 width);
+void setMainWindowHeight(u32 height);
+void setPkgViewer(const std::vector<std::string>& pkgList);
+void setElfViewer(const std::vector<std::string>& elfList);
+void setRecentFiles(const std::vector<std::string>& recentFiles);
+void setEmulatorLanguage(std::string language);
 
 const std::vector<std::filesystem::path> getGameInstallDirs();
 const std::vector<bool> getGameInstallDirsEnabled();
 std::filesystem::path getAddonInstallDir();
+u32 getMainWindowTheme();
+u32 getIconSize();
+u32 getIconSizeGrid();
+u32 getSliderPosition();
+u32 getSliderPositionGrid();
+u32 getTableMode();
+u32 getMainWindowWidth();
+u32 getMainWindowHeight();
+std::vector<std::string> getPkgViewer();
+std::vector<std::string> getElfViewer();
+std::vector<std::string> getRecentFiles();
+std::string getEmulatorLanguage();
 
 void setDefaultValues();
 

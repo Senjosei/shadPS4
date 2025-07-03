@@ -81,6 +81,24 @@ static std::vector<GameInstallDir> settings_install_dirs = {};
 std::vector<bool> install_dirs_enabled = {};
 std::filesystem::path settings_addon_install_dir = {};
 std::filesystem::path save_data_path = {};
+u32 main_window_geometry_x = 400;
+u32 main_window_geometry_y = 400;
+u32 main_window_geometry_w = 1280;
+u32 main_window_geometry_h = 720;
+u32 mw_themes = 0;
+u32 m_icon_size = 36;
+u32 m_icon_size_grid = 69;
+u32 m_slider_pos = 0;
+u32 m_slider_pos_grid = 0;
+u32 m_table_mode = 0;
+u32 m_window_size_W = 1280;
+u32 m_window_size_H = 720;
+std::vector<std::string> m_pkg_viewer;
+std::vector<std::string> m_elf_viewer;
+std::vector<std::string> m_recent_files;
+std::string emulator_language = "en_US";
+static int backgroundImageOpacity = 50;
+static bool showBackgroundImage = true;
 static bool isFullscreen = false;
 static std::string fullscreenMode = "Windowed";
 static bool isHDRAllowed = false;
@@ -480,6 +498,57 @@ void setAddonInstallDir(const std::filesystem::path& dir) {
     settings_addon_install_dir = dir;
 }
 
+void setMainWindowTheme(u32 theme) {
+    mw_themes = theme;
+}
+
+void setIconSize(u32 size) {
+    m_icon_size = size;
+}
+
+void setIconSizeGrid(u32 size) {
+    m_icon_size_grid = size;
+}
+
+void setSliderPosition(u32 pos) {
+    m_slider_pos = pos;
+}
+
+void setSliderPositionGrid(u32 pos) {
+    m_slider_pos_grid = pos;
+}
+
+void setTableMode(u32 mode) {
+    m_table_mode = mode;
+}
+
+void setMainWindowWidth(u32 width) {
+    m_window_size_W = width;
+}
+
+void setMainWindowHeight(u32 height) {
+    m_window_size_H = height;
+}
+
+void setPkgViewer(const std::vector<std::string>& pkgList) {
+    m_pkg_viewer.resize(pkgList.size());
+    m_pkg_viewer = pkgList;
+}
+
+void setElfViewer(const std::vector<std::string>& elfList) {
+    m_elf_viewer.resize(elfList.size());
+    m_elf_viewer = elfList;
+}
+
+void setRecentFiles(const std::vector<std::string>& recentFiles) {
+    m_recent_files.resize(recentFiles.size());
+    m_recent_files = recentFiles;
+}
+
+void setEmulatorLanguage(std::string language) {
+    emulator_language = language;
+}
+
 void setGameInstallDirs(const std::vector<std::filesystem::path>& dirs_config) {
     settings_install_dirs.clear();
     for (const auto& dir : dirs_config) {
@@ -519,6 +588,54 @@ std::filesystem::path getAddonInstallDir() {
         return Common::FS::GetUserPath(Common::FS::PathType::UserDir) / "addcont";
     }
     return settings_addon_install_dir;
+}
+
+u32 getMainWindowTheme() {
+    return mw_themes;
+}
+
+u32 getIconSize() {
+    return m_icon_size;
+}
+
+u32 getIconSizeGrid() {
+    return m_icon_size_grid;
+}
+
+u32 getSliderPosition() {
+    return m_slider_pos;
+}
+
+u32 getSliderPositionGrid() {
+    return m_slider_pos_grid;
+}
+
+u32 getTableMode() {
+    return m_table_mode;
+}
+
+u32 getMainWindowWidth() {
+    return m_window_size_W;
+}
+
+u32 getMainWindowHeight() {
+    return m_window_size_H;
+}
+
+std::vector<std::string> getPkgViewer() {
+    return m_pkg_viewer;
+}
+
+std::vector<std::string> getElfViewer() {
+    return m_elf_viewer;
+}
+
+std::vector<std::string> getRecentFiles() {
+    return m_recent_files;
+}
+
+std::string getEmulatorLanguage() {
+    return emulator_language;
 }
 
 u32 GetLanguage() {
@@ -654,6 +771,17 @@ void load(const std::filesystem::path& path) {
         save_data_path = toml::find_fs_path_or(gui, "saveDataPath", {});
 
         settings_addon_install_dir = toml::find_fs_path_or(gui, "addonInstallDir", {});
+        main_window_geometry_x = toml::find_or<int>(gui, "geometry_x", 0);
+        main_window_geometry_y = toml::find_or<int>(gui, "geometry_y", 0);
+        main_window_geometry_w = toml::find_or<int>(gui, "geometry_w", 0);
+        main_window_geometry_h = toml::find_or<int>(gui, "geometry_h", 0);
+        m_pkg_viewer = toml::find_or<std::vector<std::string>>(gui, "pkgDirs", {});
+        m_elf_viewer = toml::find_or<std::vector<std::string>>(gui, "elfDirs", {});
+        m_recent_files = toml::find_or<std::vector<std::string>>(gui, "recentFiles", {});
+        m_table_mode = toml::find_or<int>(gui, "gameTableMode", 0);
+        emulator_language = toml::find_or<std::string>(gui, "emulatorLanguage", "en_US");
+        backgroundImageOpacity = toml::find_or<int>(gui, "backgroundImageOpacity", 50);
+        showBackgroundImage = toml::find_or<bool>(gui, "showBackgroundImage", true);
     }
 
     if (data.contains("Settings")) {
@@ -801,6 +929,54 @@ void save(const std::filesystem::path& path) {
     data["GUI"]["addonInstallDir"] =
         std::string{fmt::UTF(settings_addon_install_dir.u8string()).data};
     data["Settings"]["consoleLanguage"] = m_language;
+
+    // Sorting of TOML sections
+    sortTomlSections(data);
+
+    std::ofstream file(path, std::ios::binary);
+    file << data;
+    file.close();
+
+    saveMainWindow(path);
+}
+
+void saveMainWindow(const std::filesystem::path& path) {
+    toml::ordered_value data;
+
+    std::error_code error;
+    if (std::filesystem::exists(path, error)) {
+        try {
+            std::ifstream ifs;
+            ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            ifs.open(path, std::ios_base::binary);
+            data = toml::parse<toml::ordered_type_config>(
+                ifs, std::string{fmt::UTF(path.filename().u8string()).data});
+        } catch (const std::exception& ex) {
+            fmt::print("Exception trying to parse config file. Exception: {}\n", ex.what());
+            return;
+        }
+    } else {
+        if (error) {
+            fmt::print("Filesystem error: {}\n", error.message());
+        }
+        fmt::print("Saving new configuration file {}\n", fmt::UTF(path.u8string()));
+    }
+
+    data["GUI"]["mw_width"] = m_window_size_W;
+    data["GUI"]["mw_height"] = m_window_size_H;
+    data["GUI"]["theme"] = mw_themes;
+    data["GUI"]["iconSize"] = m_icon_size;
+    data["GUI"]["sliderPos"] = m_slider_pos;
+    data["GUI"]["iconSizeGrid"] = m_icon_size_grid;
+    data["GUI"]["sliderPosGrid"] = m_slider_pos_grid;
+    data["GUI"]["gameTableMode"] = m_table_mode;
+    data["GUI"]["geometry_x"] = main_window_geometry_x;
+    data["GUI"]["geometry_y"] = main_window_geometry_y;
+    data["GUI"]["geometry_w"] = main_window_geometry_w;
+    data["GUI"]["geometry_h"] = main_window_geometry_h;
+    data["GUI"]["pkgDirs"] = m_pkg_viewer;
+    data["GUI"]["elfDirs"] = m_elf_viewer;
+    data["GUI"]["recentFiles"] = m_recent_files;
 
     // Sorting of TOML sections
     sortTomlSections(data);
