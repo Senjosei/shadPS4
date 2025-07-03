@@ -26,7 +26,7 @@ using Shader::LogicalStage;
 using Shader::Stage;
 using Shader::VsOutput;
 
-constexpr static auto SpirvVersion1_6 = 0x00010600U;
+constexpr static auto SpirvVersion1_6 = 0x00010500U; //0x00010600U;
 
 constexpr static std::array DescriptorHeapSizes = {
     vk::DescriptorPoolSize{vk::DescriptorType::eUniformBuffer, 8192},
@@ -393,6 +393,22 @@ bool PipelineCache::RefreshGraphicsKey() {
             LOG_WARNING(Render_Vulkan, "Invalid binary info structure!");
             key.stage_hashes[stage_out_idx] = 0;
             infos[stage_out_idx] = nullptr;
+            return false;
+        }
+
+        // Shader skips for God of War III Remastered
+        // White screen issue.
+        if (bininfo.shader_hash == 0x394ef85fcecf26dd) {
+            return false;
+        }
+
+        // Texture flickering issue.
+        if (bininfo.shader_hash == 0xccdebd80d1b8f55c) {
+            return false;
+        }
+
+        // White color glitches issue.
+        if (bininfo.shader_hash == 0x5ef487a5facae08f) {
             return false;
         }
 
